@@ -1,102 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Star, Trophy } from 'lucide-react';
+import { Star, Trophy, Target } from 'lucide-react';
 
-// Alle Sätze und Tier-Belohnungen in einer einzigen App
 const alleSätze = [
-  // Präsens
   {
-    text: "Mein Hamster frisst gerne Körner.",
+    text: "Die Katze spielt mit dem Ball.",
     zeitform: "Präsens",
-    tipp: "Beschreibt eine regelmäßige Handlung"
+    tipp: "Passiert jetzt gerade"
   },
   {
-    text: "Die Vögel zwitschern im Garten.",
-    zeitform: "Präsens",
-    tipp: "Etwas passiert genau jetzt"
-  },
-  {
-    text: "Der Pinguin watschelt lustig durch den Zoo.",
-    zeitform: "Präsens",
-    tipp: "Eine aktuelle Handlung"
-  },
-  {
-    text: "Das Eichhörnchen sammelt Nüsse für den Winter.",
-    zeitform: "Präsens",
-    tipp: "Ein aktueller Vorgang"
-  },
-  {
-    text: "Der Elefant spritzt sich Wasser auf den Rücken.",
-    zeitform: "Präsens",
-    tipp: "Passiert in diesem Moment"
-  },
-  // Präteritum
-  {
-    text: "Der kleine Igel suchte nach Futter.",
+    text: "Der Hund bellte laut.",
     zeitform: "Präteritum",
-    tipp: "Eine Geschichte aus der Vergangenheit"
+    tipp: "Geschah in der Vergangenheit"
   },
   {
-    text: "Die Katze jagte einem Schmetterling hinterher.",
-    zeitform: "Präteritum",
-    tipp: "Beschreibt was früher geschah"
-  },
-  {
-    text: "Der Hund buddelte ein tiefes Loch.",
-    zeitform: "Präteritum",
-    tipp: "Eine vergangene Handlung"
-  },
-  {
-    text: "Das Pferd galoppierte über die Wiese.",
-    zeitform: "Präteritum",
-    tipp: "Etwas das früher passierte"
-  },
-  {
-    text: "Die Maus versteckte sich vor der Katze.",
-    zeitform: "Präteritum",
-    tipp: "Teil einer Erzählung"
-  },
-  // Perfekt
-  {
-    text: "Der Koala hat den ganzen Tag geschlafen.",
+    text: "Die Maus hat den Käse gefunden.",
     zeitform: "Perfekt",
-    tipp: "Eine abgeschlossene Handlung (haben + Partizip II)"
-  },
-  {
-    text: "Die Schnecke ist über das Blatt gekrochen.",
-    zeitform: "Perfekt",
-    tipp: "Bewegung wird mit 'sein' gebildet"
-  },
-  {
-    text: "Der Frosch ist in den Teich gesprungen.",
-    zeitform: "Perfekt",
-    tipp: "Sprünge werden mit 'sein' gebildet"
-  },
-  {
-    text: "Die Spinne hat ein Netz gewebt.",
-    zeitform: "Perfekt",
-    tipp: "Eine fertige Handlung mit 'haben'"
-  },
-  {
-    text: "Der Storch ist nach Afrika geflogen.",
-    zeitform: "Perfekt",
-    tipp: "Flugbewegung mit 'sein'"
+    tipp: "Abgeschlossene Handlung mit 'haben'"
   }
+  // Weitere Sätze können hier hinzugefügt werden
 ];
 
 const tierBelohnungen = [
   { name: "Baby Pinguin", punkte: 20, emoji: "🐧" },
   { name: "Kleiner Panda", punkte: 50, emoji: "🐼" },
   { name: "Süßes Kätzchen", punkte: 100, emoji: "🐱" },
-  { name: "Niedlicher Hund", punkte: 150, emoji: "🐶" },
-  { name: "Bunter Papagei", punkte: 200, emoji: "🦜" },
-  { name: "Kleines Einhorn", punkte: 250, emoji: "🦄" },
-  { name: "Baby Elefant", punkte: 300, emoji: "🐘" },
-  { name: "Delfin", punkte: 350, emoji: "🐬" },
-  { name: "Kleiner Löwe", punkte: 400, emoji: "🦁" },
-  { name: "Magischer Drache", punkte: 500, emoji: "🐲" }
+  { name: "Niedlicher Hund", punkte: 200, emoji: "🐶" }
 ];
+
+const PunkteInfoBox = ({ punkte, streak }) => {
+  const bonusFaktor = streak >= 5 ? 3 : streak >= 3 ? 2 : 1;
+  const aktuellerPunkteWert = 10 * bonusFaktor;
+  const nächstesTier = tierBelohnungen.find(tier => tier.punkte > punkte);
+  const verbleibendePunkte = nächstesTier ? nächstesTier.punkte - punkte : 0;
+
+  return (
+    <div className="bg-blue-50 p-4 rounded-lg mb-4">
+      <div className="flex justify-between items-center mb-2">
+        <span>Aktuelle Punkte pro Aufgabe:</span>
+        <span className="font-bold text-blue-600">{aktuellerPunkteWert} 
+          {bonusFaktor > 1 && ` (${bonusFaktor}x Bonus)`}
+        </span>
+      </div>
+      {nächstesTier && (
+        <div className="flex justify-between items-center text-sm">
+          <span>Nächstes Tier:</span>
+          <span>
+            {nächstesTier.emoji} in {verbleibendePunkte} Punkten
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ZeitformenQuiz = () => {
   const [verfügbareSätze, setVerfügbareSätze] = useState([]);
@@ -169,20 +126,6 @@ const ZeitformenQuiz = () => {
     }, 1500);
   };
 
-  const NächstesBelohnungsTier = () => {
-    const nächstesTier = tierBelohnungen.find(tier => 
-      tier.punkte > punkte && !gesammeleTiere.includes(tier.name)
-    );
-    
-    if (!nächstesTier) return null;
-
-    return (
-      <div className="mt-2 text-sm text-gray-600">
-        Nächstes Tier: {nächstesTier.emoji} bei {nächstesTier.punkte} Punkten
-      </div>
-    );
-  };
-
   const BelohnungsPopup = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-lg text-center max-w-md mx-4">
@@ -226,7 +169,7 @@ const ZeitformenQuiz = () => {
               )}
             </div>
           </div>
-          <NächstesBelohnungsTier />
+          <PunkteInfoBox punkte={punkte} streak={streak} />
         </CardHeader>
 
         <CardContent className="p-6 space-y-6">
@@ -279,7 +222,6 @@ const ZeitformenQuiz = () => {
         </CardContent>
       </Card>
 
-      {/* Tier-Sammlung Übersicht */}
       <Card className="mt-4">
         <CardContent className="p-4">
           <h3 className="font-bold mb-3">Deine Tier-Sammlung:</h3>
@@ -296,7 +238,6 @@ const ZeitformenQuiz = () => {
         </CardContent>
       </Card>
 
-      {/* Belohnungs-Popup */}
       {showBelohnung && aktuellesBelohnungsTier && <BelohnungsPopup />}
     </div>
   );
